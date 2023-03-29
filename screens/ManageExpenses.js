@@ -12,6 +12,8 @@ function ManageExpenses({ route, navigation }) {
     const editedExpenseId = route.params?.expenseId;
     const isEditing = !!editedExpenseId;
     
+    const selectedExpense = expensesCtx.expenses.find(expense => expense.id === editedExpenseId)
+
     useLayoutEffect(() => {
         navigation.setOptions({
             title: isEditing ? 'Edit Expense' : 'Add Expense'
@@ -26,24 +28,15 @@ function ManageExpenses({ route, navigation }) {
 
     function cancelHandler() {
         navigation.goBack();
-     }
+    }
     
-    function confirmHandler() {
+    function confirmHandler(expenseData) {
         if (isEditing) {
             expensesCtx.updateExpense(
-                editedExpenseId,
-                {
-                description: 'Test!!!!',
-                amount: 29.99,
-                date: new Date('2023-03-25')
-            });
+                editedExpenseId, expenseData);
         }
         else {
-            expensesCtx.addExpense({
-                description: 'Test',
-                amount: 19.99,
-                date: new Date('2023-03-28')
-            });
+            expensesCtx.addExpense(expenseData);
         }
         navigation.goBack();
     }
@@ -51,11 +44,13 @@ function ManageExpenses({ route, navigation }) {
     return (
         // <Text>ManageExpenses</Text>
         <View style={styles.container}>
-            <ExpenseForm />
-            <View style={styles.buttons}>
-                <Button style={styles.button} mode="flat" onPress={cancelHandler}>Cancel</Button>
-                <Button style={styles.button} onPress={confirmHandler}>{ isEditing ? 'Update' : 'Add'}</Button>
-            </View>
+            <ExpenseForm
+                onCancel={cancelHandler}
+                onSubmit={confirmHandler}
+                isEditing={isEditing}
+                defaultValues = {selectedExpense}
+            />
+            
             {isEditing && (
                 <View style={styles.deleteContainer}>
                     <IconButton
@@ -71,15 +66,7 @@ function ManageExpenses({ route, navigation }) {
 export default ManageExpenses;
 
 const styles = StyleSheet.create({
-    buttons: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    button: {
-        minWidth: 120,
-        marginHorizontal: 8
-    },
+    
     container: {
         flex: 1,
         padding: 24,
